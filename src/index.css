@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+/*
+ * HISP Lesotho brand palette
+ * --------------------------
+ * Single source of truth for the burgundy scale.
+ * Five shades cover every real use case on this site:
+ *
+ *   50  – subtle section backgrounds, table stripes
+ *   100 – card backgrounds, light badges
+ *   600 – hover state for primary buttons
+ *   700 – PRIMARY brand color (headings, buttons, links)
+ *   900 – footer background, pressed states
+ *
+ * To adjust the brand, tweak 700 first — everything else
+ * should read as a natural lighter/darker version of it.
+ */
+@theme {
+  --color-burgundy-50:  #fdf5f6;  /* faintest tint  – section bands */
+  --color-burgundy-100: #f9e8eb;  /* light tint    – cards, badges */
+  --color-burgundy-600: #9c334b;  /* hover         – darker than 700 */
+  --color-burgundy-700: #7a1f2b;  /* PRIMARY       – matches logo  */
+  --color-burgundy-900: #4a131b;  /* darkest       – footer, pressed */
+}
