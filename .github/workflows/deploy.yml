@@ -1,0 +1,66 @@
+name: Deploy to GitHub Pages
+
+# Only run on pushes to main and manual triggers from the Actions tab.
+# Pull requests are checked by other workflows (if added later);
+# this workflow's job is to publish, not to test.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# These permissions are required by the official GitHub Pages
+# deployment actions (deploy-pages needs pages: write, and
+# id-token: write for OIDC authentication).
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# If a new push arrives while a deploy is running, cancel the older one.
+# For a static site this is safe — no half-completed state to worry about.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # GitHub Pages has no server-side rewrites. Refreshing on
+      # /hisplesotho-website/about would 404 because no about.html
+      # exists. The standard workaround: ship a 404.html that is a
+      # copy of index.html. GitHub serves it for unknown paths, the
+      # SPA boots, and React Router resolves the route on the client.
+      - name: Add SPA fallback (404.html)
+        run: cp dist/index.html dist/404.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
